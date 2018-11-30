@@ -25,13 +25,22 @@ public class DistributionHQ : MonoBehaviour {
 		Debug.Log("OnTriggerEnter2D " + other.gameObject.name);
 	}
 
-	public void Distribute(GameObject o) {
-		var product = o.GetComponent<CreativeProduct>();
-		var productData = product.ProductData;
+	public int GetDistributionPrice(CreativeProductData productData, string country, float desiredMediaSaturationPct) {
+		var data = CountryRegistry.Instance.GetCountryData(country);
+		if (data == null) {
+			Debug.LogWarning("Unknown country: " + country);
+			return 0;
+		}
 
-		Debug.Log("Distributing '" + productData.Title + "'...");
+		var marketingCostMax = data.m_Population * data.m_MarketingScaleFactor;
 
-		o.transform.parent = null;
-		Destroy(o);
+		return (int)(data.m_DistributionBasePrice + desiredMediaSaturationPct * marketingCostMax);
 	}
+
+
+	public void Distribute(CreativeProductData productData, string country, float desiredMediaSaturationPct) {
+		Debug.Log("Distributing '" + productData.Title + "' to " + country + "...");
+		GameState.Instance.m_Funds -= GetDistributionPrice(productData, country, desiredMediaSaturationPct);
+	}
+
 }

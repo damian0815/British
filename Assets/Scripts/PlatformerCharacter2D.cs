@@ -25,6 +25,7 @@ public class PlatformerCharacter2D : MonoBehaviour
     private bool m_IsOverDistributionCenter = false;
 
     public GameObject CarryingObject { get; private set; }
+    public bool IsCarryingObject { get { return CarryingObject != null; } }
 
     private void Awake()
     {
@@ -144,35 +145,45 @@ public class PlatformerCharacter2D : MonoBehaviour
             CarryingObject = best;
             CarryingObject.GetComponent<Rigidbody2D>().isKinematic = true;
             CarryingObject.GetComponent<Rigidbody2D>().angularVelocity = 0;
+            ExamineUI.Instance.Object = best;
+			ExamineUI.Instance.Visible = true;
         }
     }
 
     public void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("OnTriggerEnter " + other.gameObject.name);
+        //Debug.Log("OnTriggerEnter " + other.gameObject.name);
         if (other.gameObject.GetComponent<DistributionHQ>() != null) {
             m_IsOverDistributionCenter = true;
-        }
-    }
+        } else if (!IsCarryingObject && other.gameObject.tag == "PickupableTrigger") {
+			ExamineUI.Instance.Object = other.transform.parent.gameObject;
+			ExamineUI.Instance.Visible = true;
+		}
+	}
 
     public void OnTriggerExit2D(Collider2D other)
     {
         if (other.gameObject.GetComponent<DistributionHQ>() != null) {
             m_IsOverDistributionCenter = false;
+        } else if (!IsCarryingObject && other.gameObject.tag == "PickupableTrigger") {
+            ExamineUI.Instance.Object = null;
+            ExamineUI.Instance.Visible = false;
         }
 
     }
 
     public void Drop() {
-        if (CarryingObject != null) {
+        if (IsCarryingObject) {
             var o = CarryingObject;
-            CarryingObject = null;
-
-            o.GetComponent<Rigidbody2D>().isKinematic = false;
             if (m_IsOverDistributionCenter) {
-                DistributionHQ.Instance.Distribute(o);
-            } 
+                DistributeUI.Instance.Object = o;
+                DistributeUI.Instance.Visible = true;
+            } else {
+                CarryingObject = null;
+                o.GetComponent<Rigidbody2D>().isKinematic = false;
+            }
         }
     }
+
 }
 

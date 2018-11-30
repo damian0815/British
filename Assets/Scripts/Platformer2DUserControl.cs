@@ -9,6 +9,8 @@ public class Platformer2DUserControl : MonoBehaviour
     private PlatformerCharacter2D m_Character;
     private bool m_Jump;
 
+    private bool m_Examining = false;
+
     private void Awake()
     {
         m_Character = GetComponent<PlatformerCharacter2D>();
@@ -16,6 +18,13 @@ public class Platformer2DUserControl : MonoBehaviour
 
 
     private void Update()
+    {
+        if (!DistributeUI.Instance.Visible) {
+            UpdateInput();
+        }
+    }
+
+    private void UpdateInput()
     {
         if (!m_Jump)
         {
@@ -31,11 +40,6 @@ public class Platformer2DUserControl : MonoBehaviour
             }
         }
 
-        if (CrossPlatformInputManager.GetButtonDown("Examine")) {
-            if (m_Character.CarryingObject != null) {
-                ExamineObject(m_Character.CarryingObject);
-            }
-        }
     }
 
 
@@ -52,7 +56,9 @@ public class Platformer2DUserControl : MonoBehaviour
     private void ExamineObject(GameObject o) {
         ExamineUI.Instance.Object = o;
         ExamineUI.Instance.Visible = true;
+        m_Examining = true;
     }
+
 
 
 }
