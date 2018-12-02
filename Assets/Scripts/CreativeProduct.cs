@@ -13,10 +13,14 @@ public class CreativeProduct : MonoBehaviour {
 	public Color[] m_PossibleColors;
 
 	public string[] m_PossibleTopics;
-	public string[] m_PossibleFlavours;
+	
+	[FormerlySerializedAs("m_PossibleFlavours")]	
+	public string[] m_PossibleFlavors;
 	public string[] m_PossibleTitles;
 
 	public CreativeProductData ProductData;
+
+	private static List<string> m_UsedTitles = new List<string>();
 
 
 	// Use this for initialization
@@ -40,16 +44,17 @@ public class CreativeProduct : MonoBehaviour {
 		var color = m_PossibleColors[whichColor];
 		GetComponent<SpriteRenderer>().color = color;
 
-		var title = PickRandom(m_PossibleTitles);
-		var flavour = PickRandom(m_PossibleFlavours);
+		var title = MakeTitleUnique(PickRandom(m_PossibleTitles));
+		var flavor = PickRandom(m_PossibleFlavors);
 		var topic = PickRandom(m_PossibleTopics);
-		
+	
 		ProductData = new CreativeProductData() {
 			Color = color,
 			Title = title,
-			Flavour = flavour,
+			Flavor = flavor,
 			Topic = topic
 		};
+		m_UsedTitles.Add(title);
 	}
 
     private static string PickRandom(string[] options)
@@ -58,6 +63,15 @@ public class CreativeProduct : MonoBehaviour {
         return options[which];
     }
 
+	private static string MakeTitleUnique(string originalTitle) {
+		var title = originalTitle;
+		int counter = 0;
+		while (m_UsedTitles.Contains(title)) {
+			++counter;
+			title = originalTitle + " " + counter.ToString();
+		}
+		return title;
+	}
 
 
 }

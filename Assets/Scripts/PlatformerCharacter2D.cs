@@ -22,7 +22,7 @@ public class PlatformerCharacter2D : MonoBehaviour
     public float m_MaxPickupDistance = 2;
     public float m_HoldDistance = 1;
 
-    private bool m_IsOverDistributionCenter = false;
+    private GameObject m_OverBuilding = null;
 
     public GameObject CarryingObject { get; private set; }
     public bool IsCarryingObject { get { return CarryingObject != null; } }
@@ -153,8 +153,8 @@ public class PlatformerCharacter2D : MonoBehaviour
     public void OnTriggerEnter2D(Collider2D other)
     {
         //Debug.Log("OnTriggerEnter " + other.gameObject.name);
-        if (other.gameObject.GetComponent<DistributionHQ>() != null) {
-            m_IsOverDistributionCenter = true;
+        if (other.gameObject.tag == "Architecture") {
+            m_OverBuilding = other.gameObject;
         } else if (!IsCarryingObject && other.gameObject.tag == "PickupableTrigger") {
 			ExamineUI.Instance.Object = other.transform.parent.gameObject;
 			ExamineUI.Instance.Visible = true;
@@ -163,8 +163,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 
     public void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.GetComponent<DistributionHQ>() != null) {
-            m_IsOverDistributionCenter = false;
+        if (other.gameObject.tag == "Architecture") {
+            m_OverBuilding = null;
         } else if (!IsCarryingObject && other.gameObject.tag == "PickupableTrigger") {
             ExamineUI.Instance.Object = null;
             ExamineUI.Instance.Visible = false;
@@ -175,9 +175,14 @@ public class PlatformerCharacter2D : MonoBehaviour
     public void Drop() {
         if (IsCarryingObject) {
             var o = CarryingObject;
-            if (m_IsOverDistributionCenter) {
-                DistributeUI.Instance.Object = o;
-                DistributeUI.Instance.Visible = true;
+            if (m_OverBuilding != null) {
+                if (m_OverBuilding.GetComponent<DistributionHQ>() != null) {
+                    DistributeUI.Instance.Object = o;
+                    DistributeUI.Instance.Visible = true;
+                } else if (m_OverBuilding.GetComponent<MarketResearchHQ>() != null) {
+                    MarketResearchUI.Instance.Object = o;
+                    MarketResearchUI.Instance.Visible = true;
+                }
             } else {
                 CarryingObject = null;
                 o.GetComponent<Rigidbody2D>().isKinematic = false;

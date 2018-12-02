@@ -27,19 +27,11 @@ public class ExamineUI : MonoBehaviour {
 			return m_Visible;
 		}
 		set {
-			if (m_Visible != value) {
-				GetComponent<Canvas>().enabled = value;
-				GetComponent<CanvasGroup>().interactable = value;
-				m_Visible = value;
-				m_DebounceInput = true;
-				if (m_Visible) {
-					transform.FindDeepChild("CloseButton").GetComponent<Button>().Select();
-				}
-			}
+			m_ShouldBeVisible = value;
 		}
 	}
 	private bool m_Visible = false;
-	private bool m_DebounceInput = false;
+	private bool m_ShouldBeVisible = false;
 
 	void Awake() {
 		m_Visible = GetComponent<Canvas>().enabled;
@@ -59,12 +51,19 @@ public class ExamineUI : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (Visible && CrossPlatformInputManager.GetButtonDown("Cancel")) {
+			Visible = false;
+		}
+	}
 
-		if (m_DebounceInput) {
-			m_DebounceInput = false;
-		} else {
-			if (Visible && CrossPlatformInputManager.GetButtonDown("Cancel")) {
-				Visible = false;
+	void LateUpdate() {
+		var value = m_ShouldBeVisible;
+		if (m_Visible != value) {
+			GetComponent<Canvas>().enabled = value;
+			GetComponent<CanvasGroup>().interactable = value;
+			m_Visible = value;
+			if (m_Visible) {
+				transform.FindDeepChild("CloseButton").GetComponent<Button>().Select();
 			}
 		}
 
@@ -79,7 +78,7 @@ public class ExamineUI : MonoBehaviour {
 		transform.FindDeepChild("Title").GetComponent<Text>().text = "Title: " + pd.Title;
 		transform.FindDeepChild("ColourSwatch").GetComponent<Image>().color = pd.Color;
 		transform.FindDeepChild("Topic").GetComponent<Text>().text = "Topic: " + pd.Topic;
-		transform.FindDeepChild("Flavour").GetComponent<Text>().text = "Flavour: " + pd.Flavour;
+		transform.FindDeepChild("Flavor").GetComponent<Text>().text = "Flavor: " + pd.Flavor;
 	}
 
 
